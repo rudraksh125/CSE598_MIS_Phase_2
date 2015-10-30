@@ -78,7 +78,8 @@ def print_file_size(path):
         byteArr = bytearray(fi.read(fileSize))
         fi.close()
         fileSize = len(byteArr)
-        print 'File size in bytes:', fileSize
+        # print 'File size in bytes:', fileSize
+        print fileSize
 
 def bitReader(n): # number of bits to read
     global byteArr
@@ -94,15 +95,20 @@ def bitReader(n): # number of bits to read
     return bitStr
 
 
-def compressToOutputFile(input_file, fileName, option):
-    print ("fileName: " + fileName)
+def compressToOutputFile(input_file, output_file_name, option):
+    print ("fileName: " + output_file_name)
     print ("option: " + str(option))
     global tupleList
     global bitStream
     if option == 1:
-        file = open(fileName, 'w')
+        file = open(output_file_name, 'w')
         file.write(open(input_file,'r').read())
         file.close()
+        print "Size of input file in bytes: "
+        print_file_size(input_file)
+        print "Size of output file in bytes: "
+        print_file_size(output_file_name)
+
     if option == 2:
         # read the whole input file into a byte array
         fileSize = os.path.getsize(str(os.path.abspath((input_file))))
@@ -111,7 +117,7 @@ def compressToOutputFile(input_file, fileName, option):
         byteArr = bytearray(fi.read(fileSize))
         fi.close()
         fileSize = len(byteArr)
-        print 'File size in bytes:', fileSize
+        print "Size of input file in bytes: ", fileSize
 
          # calculate the total number of each byte value in the file
         freqList = [0] * 256
@@ -141,7 +147,7 @@ def compressToOutputFile(input_file, fileName, option):
         # write a list of (byteValue,3-bit(len(encodingBitStr)-1),encodingBitStr)
         # tuples as the compressed file header
         bitStream = ''
-        fo = open(fileName, 'wb')
+        fo = open(output_file_name, 'wb')
         fo.write(chr(len(dic) - 1)) # first write the number of encoding tuples
         for (byteValue, encodingBitStr) in dic.iteritems():
             # convert the byteValue into 8-bit and send to be written into file
@@ -170,20 +176,27 @@ def compressToOutputFile(input_file, fileName, option):
         byteWriter('0' * 8, fo) # to write the last remaining bits (if any)
         fo.close()
 
+        print "Size of compressed file in bytes: "
+        print_file_size(output_file_name)
+
     if option == 3:
 
+        print "Size of input file in bytes: "
         print_file_size(input_file)
         mybytes = lzw.readbytes(input_file)
         lessbytes = lzw.compress(mybytes)
-        lzw.writebytes(fileName, lessbytes)
-        print_file_size(fileName)
+        lzw.writebytes(output_file_name, lessbytes)
+        print "Size of compressed file in bytes: "
+        print_file_size(output_file_name)
 
     if option == 4:
 
+        print "Size of input file in bytes: "
         print_file_size(input_file)
         ar = arcode.ArithmeticCode(False)
-        ar.encode_file(input_file, fileName)
-        print_file_size(fileName)
+        ar.encode_file(input_file, output_file_name)
+        print "Size of compressed file in bytes: "
+        print_file_size(output_file_name)
 
 #main
 main()
