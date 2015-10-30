@@ -3,43 +3,6 @@ import lzw
 import arcode
 from sys import platform as _platform
 
-
-def shannon_fano_encoder(iA, iB): # iA to iB : index interval
-    global tupleList
-    size = iB - iA + 1
-    if size > 1:
-        # Divide the list into 2 groups.
-        # Top group will get 0, bottom 1 as the new encoding bit.
-        mid = int(size / 2 + iA)
-        for i in range(iA, iB + 1):
-            tup = tupleList[i]
-            if i < mid: # top group
-                tupleList[i] = (tup[0], tup[1], tup[2] + '0')
-            else: # bottom group
-                tupleList[i] = (tup[0], tup[1], tup[2] + '1')
-        # do recursive calls for both groupszy
-        shannon_fano_encoder(iA, mid - 1)
-        shannon_fano_encoder(mid, iB)
-
-def byteWriter(bitStr, outputFile):
-    global bitStream
-    bitStream += bitStr
-    while len(bitStream) > 8: # write byte(s) if there are more then 8 bits
-        byteStr = bitStream[:8]
-        bitStream = bitStream[8:]
-        outputFile.write(chr(int(byteStr, 2)))
-
-def print_file_size(path):
-        # read the whole input file into a byte array
-        fileName = str(os.path.abspath(path))
-        fileSize = os.path.getsize(fileName)
-        fi = open(fileName, 'rb')
-        # byteArr = map(ord, fi.read(fileSize))
-        byteArr = bytearray(fi.read(fileSize))
-        fi.close()
-        fileSize = len(byteArr)
-        print 'File size in bytes:', fileSize
-
 def main():
     path = raw_input("Enter .tpq or .spq filename: ")
     if _platform == "linux" or _platform == "linux2":
@@ -79,6 +42,56 @@ def main():
             print("\n/****************************************************************/\n")
         else:
             print("Chosen option is not valid \n")
+
+
+def shannon_fano_encoder(iA, iB): # iA to iB : index interval
+    global tupleList
+    size = iB - iA + 1
+    if size > 1:
+        # Divide the list into 2 groups.
+        # Top group will get 0, bottom 1 as the new encoding bit.
+        mid = int(size / 2 + iA)
+        for i in range(iA, iB + 1):
+            tup = tupleList[i]
+            if i < mid: # top group
+                tupleList[i] = (tup[0], tup[1], tup[2] + '0')
+            else: # bottom group
+                tupleList[i] = (tup[0], tup[1], tup[2] + '1')
+        # do recursive calls for both groupszy
+        shannon_fano_encoder(iA, mid - 1)
+        shannon_fano_encoder(mid, iB)
+
+def byteWriter(bitStr, outputFile):
+    global bitStream
+    bitStream += bitStr
+    while len(bitStream) > 8: # write byte(s) if there are more then 8 bits
+        byteStr = bitStream[:8]
+        bitStream = bitStream[8:]
+        outputFile.write(chr(int(byteStr, 2)))
+
+def print_file_size(path):
+        # read the whole input file into a byte array
+        fileName = str(os.path.abspath(path))
+        fileSize = os.path.getsize(fileName)
+        fi = open(fileName, 'rb')
+        # byteArr = map(ord, fi.read(fileSize))
+        byteArr = bytearray(fi.read(fileSize))
+        fi.close()
+        fileSize = len(byteArr)
+        print 'File size in bytes:', fileSize
+
+def bitReader(n): # number of bits to read
+    global byteArr
+    global bitPosition
+    bitStr = ''
+    for i in range(n):
+        bitPosInByte = 7 - (bitPosition % 8)
+        bytePosition = int(bitPosition / 8)
+        byteVal = byteArr[bytePosition]
+        bitVal = int(byteVal / (2 ** bitPosInByte)) % 2
+        bitStr += str(bitVal)
+        bitPosition += 1 # prepare to read the next bit
+    return bitStr
 
 
 def compressToOutputFile(input_file, fileName, option):
