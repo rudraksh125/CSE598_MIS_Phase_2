@@ -13,7 +13,7 @@ def main():
         slash = '\\'
 
     input_file = open(path, 'r')
-    print input_file.read()
+    # print input_file.read()
 
     while True:
         option = raw_input("Select encoding scheme:  "
@@ -106,7 +106,7 @@ def compressToOutputFile(input_file, output_file_name, option):
         file.close()
         print "Size of input file in bytes: "
         print_file_size(input_file)
-        print "Size of output file in bytes: "
+        print "Size of output file ("+ output_file_name +") in bytes: "
         print_file_size(output_file_name)
 
     if option == 2:
@@ -176,7 +176,7 @@ def compressToOutputFile(input_file, output_file_name, option):
         byteWriter('0' * 8, fo) # to write the last remaining bits (if any)
         fo.close()
 
-        print "Size of compressed file in bytes: "
+        print "Size of compressed putput file ("+ output_file_name +") in bytes: "
         print_file_size(output_file_name)
 
     if option == 3:
@@ -186,7 +186,7 @@ def compressToOutputFile(input_file, output_file_name, option):
         mybytes = lzw.readbytes(input_file)
         lessbytes = lzw.compress(mybytes)
         lzw.writebytes(output_file_name, lessbytes)
-        print "Size of compressed file in bytes: "
+        print "Size of compressed putput file ("+ output_file_name +") in bytes: "
         print_file_size(output_file_name)
 
     if option == 4:
@@ -195,7 +195,7 @@ def compressToOutputFile(input_file, output_file_name, option):
         print_file_size(input_file)
         ar = arcode.ArithmeticCode(False)
         ar.encode_file(input_file, output_file_name)
-        print "Size of compressed file in bytes: "
+        print "Size of compressed putput file ("+ output_file_name +") in bytes: "
         print_file_size(output_file_name)
 
 #main
