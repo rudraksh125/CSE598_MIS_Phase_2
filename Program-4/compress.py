@@ -1,3 +1,5 @@
+__author__ = 'kvivekan'
+
 import os
 import lzw
 import arcode
