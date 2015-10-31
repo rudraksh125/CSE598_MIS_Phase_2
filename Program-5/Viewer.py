@@ -43,29 +43,21 @@ while True and c < 250:
 
 CODEC = cv2.cv.CV_FOURCC('D','I','V','X') # MPEG-4 = MPEG-1
 
-out = cv2.VideoWriter('output.mp4',CODEC, 20.0, (w,h))
 count=0
+print "processing frames..."
 for i in range(0, 250):
-    print 'frame #:', i
+    if i % 10 == 0:
+        print 'processed frame #:', i
     gray = list_frames[i]
     frame = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
     f = '{:04}'.format(count)
     name = "frame"+f+".jpg"
     count+=1
     cv2.imwrite(name, frame)
-    out.write(frame)
 
 # Release the capture
 del(cap)
-del(out)
 print 'released capture'
-
-for i in range(21):
-    sys.stdout.write('\r')
-    # the exact output you're looking for:
-    sys.stdout.write("[%-20s] %d%%" % ('='*i, 5*i))
-    sys.stdout.flush()
-    sleep(0.1)
 
 def combine(ext, output):
     # Arguments
@@ -91,7 +83,6 @@ def combine(ext, output):
         frame = cv2.imread(image_path)
 
         out.write(frame) # Write out frame to video
-
         cv2.imshow('video',frame)
         if (cv2.waitKey(1) & 0xFF) == ord('q'): # Hit `q` to exit
             break
