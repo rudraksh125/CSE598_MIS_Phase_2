@@ -1,5 +1,8 @@
 import numpy as np
 import cv2
+import os
+import sys
+from time import sleep
 
 cap = cv2.VideoCapture('../Program-1/sampleOutputFiles/1.mp4')
 
@@ -12,13 +15,12 @@ pos_frame = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
 w=int(cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH ))
 h=int(cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT ))
 list_frames  = []
-outwriter = cv2.VideoWriter('output.mp4',-1, 20.0, (w,h))
+
 c = 0
 while True and c < 250:
     c += 1
     flag, frame = cap.read()
     if flag:
-        #outwriter.write(frame)
         # The frame is ready and already captured
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         list_frames.append(gray)
@@ -41,16 +43,6 @@ while True and c < 250:
 
 CODEC = cv2.cv.CV_FOURCC('D','I','V','X') # MPEG-4 = MPEG-1
 
-# Initialize the video writer to write the file
-# writer = cv2.cv.CreateVideoWriter(
-#     'out.mp4',     # Filename
-#     -1,                              # Codec for compression
-#     25,                                 # Frames per second
-#     (640, 480),                         # Width / Height tuple
-#     False                                # Color flag
-# )
-
-#fourcc = cv2.VideoWriter_fourcc(*'XVID')
 out = cv2.VideoWriter('output.mp4',CODEC, 20.0, (w,h))
 count=0
 for i in range(0, 250):
@@ -61,32 +53,63 @@ for i in range(0, 250):
     name = "frame"+f+".jpg"
     count+=1
     cv2.imwrite(name, frame)
-    # image = cv2.imdecode(frame, cv2.CV_LOAD_IMAGE_GRAYSCALE)
     out.write(frame)
-    # print gray
-    # cv2.cv.ShowImage("w1", cv2.cv.fromarray(frame))
-    # image = cv2.cv.GetImage(cv2.cv.fromarray(frame))
-    # cv2.cv.WriteFrame(writer, image)
-
 
 # Release the capture
 del(cap)
 del(out)
 print 'released capture'
-#
-# cap = cv2.VideoCapture('out.mp4')
-# while not cap.isOpened():
-#     cap = cv2.VideoCapture('out.mp4')
-#     cv2.waitKey(1000)
-#     print "Wait for the header"
-# while True:
-#     flag, frame = cap.read()
-#     if flag:
-#         # The frame is ready and already captured
-#         cv2.imshow('video', frame)
-#         pos_frame = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
-#         print str(pos_frame)+" frames"
-#
-#     if cv2.waitKey(10) == 27:
-#         break
 
+for i in range(21):
+    sys.stdout.write('\r')
+    # the exact output you're looking for:
+    sys.stdout.write("[%-20s] %d%%" % ('='*i, 5*i))
+    sys.stdout.flush()
+    sleep(0.1)
+
+def combine(ext, output):
+    # Arguments
+    dir_path = '.'
+    images = []
+    for f in sorted(os.listdir(dir_path)):
+        if f.endswith(ext):
+            images.append(f)
+
+    # Determine the width and height from the first image
+    image_path = os.path.join(dir_path, images[0])
+    frame = cv2.imread(image_path)
+    cv2.imshow('video',frame)
+    height, width, channels = frame.shape
+
+    # Define the codec and create VideoWriter object
+    fourcc = cv2.cv.CV_FOURCC(*'mp4v') # Be sure to use lower case
+    out = cv2.VideoWriter(output, fourcc, 20.0, (width, height))
+
+    for image in images:
+
+        image_path = os.path.join(dir_path, image)
+        frame = cv2.imread(image_path)
+
+        out.write(frame) # Write out frame to video
+
+        cv2.imshow('video',frame)
+        if (cv2.waitKey(1) & 0xFF) == ord('q'): # Hit `q` to exit
+            break
+
+    # Release everything if job is finished
+    out.release()
+    cv2.destroyAllWindows()
+
+    print("The output video is {}".format(output))
+
+    for f in sorted(os.listdir(dir_path)):
+        file_path = os.path.join(dir_path, f)
+        if f.endswith(ext):
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception, e:
+                print e
+
+
+combine('jpg','output.mp4')
