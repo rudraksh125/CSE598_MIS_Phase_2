@@ -127,7 +127,7 @@ def main():
 
             output_file = temp_decoded_file_name[0] + "." + file_extension
             predictive_coding_option = temp_decoded_file_name[0].rsplit("_",1)[1]
-            decode(predictive_coding_option, temp_output_file, output_file)
+            decode(int(predictive_coding_option), temp_output_file, output_file)
 
             view(output_file, file_extension)
 
