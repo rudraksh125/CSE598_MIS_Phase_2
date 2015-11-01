@@ -22,7 +22,8 @@ while True and c < 250:
     flag, frame = cap.read()
     if flag:
         # The frame is ready and already captured
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV)
         list_frames.append(gray)
         cv2.imshow('video', gray)
         pos_frame = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
@@ -49,7 +50,8 @@ for i in range(0, 250):
     if i % 10 == 0:
         print 'processed frame #:', i
     gray = list_frames[i]
-    frame = cv2.cvtColor(gray, cv2.COLOR_YUV2BGR)
+    # frame = cv2.cvtColor(gray, cv2.COLOR_YUV2BGR)
+    frame = gray #both works properly
     f = '{:04}'.format(count)
     name = "frame"+f+".jpg"
     count+=1
@@ -93,14 +95,14 @@ def combine(ext, output):
 
     print("The output video is {}".format(output))
 
-    for f in sorted(os.listdir(dir_path)):
-        file_path = os.path.join(dir_path, f)
-        if f.endswith(ext):
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-            except Exception, e:
-                print e
+    # for f in sorted(os.listdir(dir_path)):
+    #     file_path = os.path.join(dir_path, f)
+    #     if f.endswith(ext):
+    #         try:
+    #             if os.path.isfile(file_path):
+    #                 os.unlink(file_path)
+    #         except Exception, e:
+    #             print e
+    #
 
-
-combine('jpg','output.mp4')
+combine('jpg','output_viewer.mp4')

@@ -5,6 +5,8 @@ import os
 import cv2
 import numpy
 import re
+import sys
+sys.path.append('../Program-4/')
 import lzw
 from sys import platform as _platform
 
@@ -21,7 +23,7 @@ def bitReader(n): # number of bits to read
         bitPosition += 1 # prepare to read the next bit
     return bitStr
 
-def decode(option, decompressed_file):
+def decode(predictive_coding_option, temp_decoded_file, temp_output_file):
     pass
 
 def decompress(option, encoded_file, decoded_file):
@@ -123,13 +125,13 @@ def main():
 
             decompress(compression_option,path, temp_output_file)
 
-            temp_decoded_file_name = file_name.lsplit("_",2)
-            temp_decoded_file = temp_decoded_file_name + "_dc." + file_extension
+            temp_decoded_file_name = file_name.rsplit("_",2)
+            temp_decoded_file = temp_decoded_file_name[0] + "_dc." + file_extension
 
-            predictive_coding_option = temp_decoded_file_name.lsplit("_",1)[1]
-            decode (predictive_coding_option , temp_output_file, temp_decoded_file)
+            predictive_coding_option = temp_decoded_file_name[0].rsplit("_",1)[1]
+            decode(predictive_coding_option, temp_decoded_file, temp_output_file)
 
-            view(temp_decoded_file, file_extension)
+            view(temp_output_file, file_extension)
 
             print("\n/****************************************************************/\n")
         else:
@@ -165,26 +167,27 @@ def combine_tpv(input_file_name):
                 r.append(l)
                 l = []
                 t = frames[i][j],0,0
-                l.append(numpy.array((t)))
+                l.append(numpy.array((t)).astype(numpy.uint8))
             else:
                 t = frames[i][j],0,0
-                l.append(numpy.array((t)))
-        r.append(numpy.array(l))
-        window.append(numpy.array(r))
+                l.append(numpy.array((t)).astype(numpy.uint8))
+        r.append(numpy.array(l).astype(numpy.uint8))
+        window.append(numpy.array(r).astype(numpy.uint8))
 
     # for i in range(len(window)):
     #     print "frame #: " + str(i)
     #     print window[i]
 
     for ff in window:
-        cv2.imshow('video', ff)
-        if (cv2.waitKey(10) & 0xFF) == ord('q'): # Hit `q` to exit
-            break
-        f = '{:04}'.format(count)
-        name = "frame"+f+".jpg"
-        count+=1
-        yframes = cv2.cvtColor(ff, cv2.COLOR_YUV2BGR)
-        cv2.imwrite(name, yframes)
+        if len(ff)>0:
+            cv2.imshow('video', ff)
+            if (cv2.waitKey(10) & 0xFF) == ord('q'): # Hit `q` to exit
+                break
+            f = '{:04}'.format(count)
+            name = "frame"+f+".jpg"
+            count+=1
+            yframes = cv2.cvtColor(ff, cv2.COLOR_YUV2BGR)
+            cv2.imwrite(name, yframes)
     print "tst"
 
 def combine_spv(input_file_name):
@@ -197,28 +200,30 @@ def combine_spv(input_file_name):
     r = []
     for i in range(len(lines)):
         r = []
-        if not "# Frame" in lines[i]:
+        if not "#" in lines[i]:
             line = re.sub('\s+', ',', lines[i]).strip()
             word = line.split(',')
             for w in word:
                 if '\n' not in w and len(w)>0:
                     pixel = int(float(w)),0,0
-                    r.append(numpy.array(pixel))
-            frames.append(numpy.array(r))
+                    r.append(numpy.array(pixel).astype(numpy.uint8))
+            frames.append(numpy.array(r).astype(numpy.uint8))
         else:
             if len(frames)>0:
-                fframe.append(numpy.array(frames))
-    fframe.append(numpy.array(frames))
+                fframe.append(numpy.array(frames).astype(numpy.uint8))
+                frames = []
+    fframe.append(numpy.array(frames).astype(numpy.uint8))
 
     for ff in fframe:
-        cv2.imshow('video', ff)
-        if (cv2.waitKey(10) & 0xFF) == ord('q'): # Hit `q` to exit
-            break
-        f = '{:04}'.format(count)
-        name = "frame"+f+".jpg"
-        count+=1
-        yframes = cv2.cvtColor(ff, cv2.COLOR_YUV2BGR)
-        cv2.imwrite(name, yframes)
+        if len(ff)>0:
+            cv2.imshow('video', ff)
+            if (cv2.waitKey(10) & 0xFF) == ord('q'): # Hit `q` to exit
+                break
+            f = '{:04}'.format(count)
+            name = "frame"+f+".jpg"
+            count+=1
+            yframes = cv2.cvtColor(ff, cv2.COLOR_YUV2BGR)
+            cv2.imwrite(name, yframes)
     print "tst"
 
 def combine(ext, output):
@@ -243,9 +248,9 @@ def combine(ext, output):
 
         image_path = os.path.join(dir_path, image)
         frame = cv2.imread(image_path)
-
-        out.write(frame) # Write out frame to video
-        cv2.imshow('video',frame)
+        if(len(frame)>0):
+            out.write(frame) # Write out frame to video
+            cv2.imshow('video',frame)
         if (cv2.waitKey(1) & 0xFF) == ord('q'): # Hit `q` to exit
             break
 
@@ -266,9 +271,9 @@ def combine(ext, output):
 
 
 def view(temp_decoded_file, file_extension):
-    if '.spv' in file_extension:
+    if 'spv' in file_extension:
         combine_spv(temp_decoded_file)
-    elif '.tpv' in file_extension:
+    elif 'tpv' in file_extension:
         combine_tpv(temp_decoded_file)
     combine('jpg','output.mp4')
 

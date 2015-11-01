@@ -50,36 +50,39 @@ def combine_tpv():
 def combine_spv():
     fframe = []
     count = 0
-    # with open('../Program-4/2_1_1_1.spv') as f:
-    with open('frame.spv') as f:
+    with open('2_5_1_2_dc.spv') as f:
+    # with open('frame.spv') as f:
         lines =  [x.rstrip('\n') for x in f.readlines()]
     frames = []
     r = []
     for i in range(len(lines)):
         r = []
-        if not "# Frame" in lines[i]:
+        if not "#" in lines[i]:
             line = re.sub('\s+', ',', lines[i]).strip()
             word = line.split(',')
             for w in word:
                 if '\n' not in w and len(w)>0:
                     pixel = int(float(w)),0,0
-                    r.append(numpy.array(pixel))
-            frames.append(numpy.array(r))
+                    r.append((numpy.array(pixel)).astype(numpy.uint8))
+            frames.append(numpy.array(r).astype(numpy.int32))
         else:
             if len(frames)>0:
-                fframe.append(numpy.array(frames))
+                fframe.append(numpy.array(frames).astype(numpy.uint8))
                 frames = []
-    fframe.append(numpy.array(frames))
+    fframe.append(numpy.array(frames).astype(numpy.uint8))
 
     for ff in fframe:
-        cv2.imshow('video', ff)
+        print count
+        if len(ff)>0:
+            cv2.imshow('video', ff)
+            f = '{:04}'.format(count)
+            name = "frame"+f+".jpg"
+            count+=1
+            yframes = cv2.cvtColor(ff, cv2.COLOR_YUV2BGR)
+        if len(ff)>0:
+            cv2.imwrite(name, yframes)
         if (cv2.waitKey(10) & 0xFF) == ord('q'): # Hit `q` to exit
             break
-        f = '{:04}'.format(count)
-        name = "frame"+f+".jpg"
-        count+=1
-
-        cv2.imwrite(name, ff)
     print "tst"
 
 #main
