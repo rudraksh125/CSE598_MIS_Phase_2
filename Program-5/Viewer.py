@@ -49,7 +49,7 @@ for i in range(0, 250):
     if i % 10 == 0:
         print 'processed frame #:', i
     gray = list_frames[i]
-    frame = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+    frame = cv2.cvtColor(gray, cv2.COLOR_YUV2BGR)
     f = '{:04}'.format(count)
     name = "frame"+f+".jpg"
     count+=1

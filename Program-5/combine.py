@@ -78,6 +78,7 @@ def combine_spv():
         f = '{:04}'.format(count)
         name = "frame"+f+".jpg"
         count+=1
+
         cv2.imwrite(name, ff)
     print "tst"
 
