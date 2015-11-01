@@ -23,14 +23,14 @@ def bitReader(n): # number of bits to read
         bitPosition += 1 # prepare to read the next bit
     return bitStr
 
-def decode(predictive_coding_option, temp_decoded_file, temp_output_file):
-    pass
-
 def decompress(option, encoded_file, decoded_file):
     global byteArr
     global bitPosition
     if option == "1":
         print "no compression"
+        file = open(decoded_file, 'w')
+        file.write(open(encoded_file,'r').read())
+        file.close()
     if option == "2":
         # read the whole input file into a byte array
         fileSize = os.path.getsize(str(os.path.abspath((encoded_file))))
@@ -128,10 +128,11 @@ def main():
             temp_decoded_file_name = file_name.rsplit("_",2)
             temp_decoded_file = temp_decoded_file_name[0] + "_dc." + file_extension
 
+            output_file = temp_decoded_file_name[0] + "." + file_extension
             predictive_coding_option = temp_decoded_file_name[0].rsplit("_",1)[1]
-            decode(predictive_coding_option, temp_decoded_file, temp_output_file)
+            decode(predictive_coding_option, temp_output_file, output_file)
 
-            view(temp_output_file, file_extension)
+            view(output_file, file_extension)
 
             print("\n/****************************************************************/\n")
         else:
@@ -206,7 +207,9 @@ def combine_spv(input_file_name):
             for w in word:
                 if '\n' not in w and len(w)>0:
                     pixel = int(float(w)),0,0
-                    r.append(numpy.array(pixel).astype(numpy.uint8))
+                    p = numpy.array(pixel, dtype= numpy.uint8)
+                    # r.append(numpy.array(pixel).astype(numpy.uint8))
+                    r.append(p)
             frames.append(numpy.array(r).astype(numpy.uint8))
         else:
             if len(frames)>0:
@@ -225,6 +228,95 @@ def combine_spv(input_file_name):
             yframes = cv2.cvtColor(ff, cv2.COLOR_YUV2BGR)
             cv2.imwrite(name, yframes)
     print "tst"
+
+def decode(compression_option, input_dc_file, output_file):
+    fframe = []
+    count = 0
+    with open(input_dc_file) as f:
+        lines =  [x.rstrip('\n') for x in f.readlines()]
+    frames = []
+    r = []
+    for i in range(len(lines)):
+        r = []
+        if not "#" in lines[i]:
+            line = re.sub('\s+', ',', lines[i]).strip()
+            word = line.split(',')
+            for w in word:
+                if '\n' not in w and len(w)>0:
+                    pixel = int(float(w)),0,0
+                    r.append(numpy.array(pixel))
+            frames.append(numpy.array(r))
+        else:
+            if len(frames)>0:
+                fframe.append(numpy.array(frames))
+                frames = []
+    fframe.append(numpy.array(frames))
+
+    mat = numpy.ndarray((fframe.__len__(),10,10), dtype = float, order = 'F')
+    print fframe.__len__()
+    for frame_index in range(0, fframe.__len__()):
+        for i in range(0, 10):
+            for j in range(0, 10):
+                if len(fframe[frame_index])>0:
+                    mat[frame_index,i,j] = fframe[frame_index][i][j][0]
+
+    original_mat =   numpy.ndarray((fframe.__len__(),10,10), dtype = float, order = 'F')
+    outfile = open(output_file,'w')
+    frame_index = 0
+    if(compression_option == 1):
+        for frame_index in range(0, fframe.__len__()):
+            for i in range(0, 10):
+                for j in range(0,10):
+                    original_mat[frame_index,i,j] = mat[frame_index,i,j]
+
+    elif(compression_option == 2):
+        for frame_index in range(0, fframe.__len__()):
+            for i in range (0, 10):
+                original_mat[frame_index, i, 0] = mat[frame_index, i,0]
+
+            for i in range (0, 10):
+                for j in range(1, 10):
+                    original_mat[frame_index, i, j] = float(mat[frame_index, i, j]) + float(original_mat[frame_index, i,j-1])
+
+    elif(compression_option == 3):
+        for frame_index in range(0, fframe.__len__()):
+            for j in range (0, 10):
+                original_mat[frame_index, 0, j] = mat[frame_index, 0,j]
+
+            for i in range (1, 10):
+                    for j in range(0, 10):
+                        original_mat[frame_index, i, j] = float(mat[frame_index, i, j]) + float(original_mat[frame_index, i-1,j])
+
+    elif(compression_option == 4):
+        for frame_index in range(0, fframe.__len__()):
+            for j in range (0, 10):
+                original_mat[frame_index, 0, j] = mat[frame_index, 0,j]
+
+            for i in range(0, 10):
+                original_mat[frame_index, i, 0] = mat[frame_index, i,0]
+
+            for i in range (1, 10):
+                for j in range(1, 10):
+                    original_mat[frame_index, i, j] = float(mat[frame_index, i, j]) + float(original_mat[frame_index, i-1,j-1])
+
+    elif(compression_option == 5):
+        for frame_index in range(0, fframe.__len__()):
+            for j in range (0, 10):
+                original_mat[frame_index, 0, j] = mat[frame_index, 0,j]
+
+            for i in range(0, 10):
+                original_mat[frame_index, i, 0] = mat[frame_index, i,0]
+
+            for i in range (1, 10):
+                for j in range(1, 10):
+                        original_mat[frame_index, i, j] = float(mat[frame_index, i, j]) + 1.0/3*(float(original_mat[frame_index, i-1,j-1])+float(original_mat[frame_index, i-1, j]+float(original_mat[frame_index, i, j-1])))
+
+    frame_index = 0
+    for frame in original_mat:
+        outfile.write('# Frame: {0}\n'.format(frame_index))
+        numpy.savetxt(outfile, frame, fmt='%-7.2f')
+        frame_index+=1
+
 
 def combine(ext, output):
     # Arguments
@@ -275,7 +367,7 @@ def view(temp_decoded_file, file_extension):
         combine_spv(temp_decoded_file)
     elif 'tpv' in file_extension:
         combine_tpv(temp_decoded_file)
-    combine('jpg','output.mp4')
+    combine('jpg','output_'+temp_decoded_file+'.mp4')
 
 #main
 main()
