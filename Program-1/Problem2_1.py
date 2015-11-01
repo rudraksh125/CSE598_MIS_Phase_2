@@ -6,10 +6,10 @@ import pickle
 from sys import platform as _platform
 
 
-frameStartX = 10
-frameStartY = 10
-row_length = 3
-col_length = 3
+frameStartX = 100
+frameStartY = 100
+row_length = 10
+col_length = 10
 yComponent = [None] * (row_length * row_length)
 yComponent_option2 = [None] * (row_length * row_length)
 yComponent_option3 = [None] * (row_length * row_length)
@@ -20,6 +20,7 @@ option4_absoluteDiff = 0
 videoFileName = ""
 path = ""
 videoFilePath = ""
+absError = 0
 
 def main():
 
@@ -71,21 +72,21 @@ def extractFrames():
     # videoFilePath = '/Users/rahulkrsna/Documents/ASU_Fall2015/MIS/HW-2/1.mp4'
 
     cap = cv2.VideoCapture(videoFilePath)
-
     frameNumber=0
+
     while cap.isOpened():
         logPrinter("#0 Cap")
         ret, frame = cap.read()
+
         if ret == True:
             #Extract a portion of frame
-            tImage = frame[frameStartX:frameStartX+row_length, frameStartY:frameStartY+col_length]
+            tImage = frame[frameStartY:frameStartY+row_length, frameStartX:frameStartX+col_length]
             createSignalList(tImage,frameNumber)
             frameNumber += 1
-            if(frameNumber == 20):
-                cap.release()
         else:
             cap.release()
-    print frameNumber
+
+    logPrinter(frameNumber)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
 
@@ -105,9 +106,11 @@ def createSignalList(input_image, frameNumber):
     yuvImage = cv2.cvtColor(input_image,cv2.COLOR_BGR2YUV)
     y,u,v = cv2.split(yuvImage)
     index=0
+
     logPrinter("#2 {0}".format(len(y)))
     logPrinter("#3 {0}".format(frameNumber))
     logPrinter("#3 {0}".format(len(yComponent)))
+
 
     for row in y:
         for col in row:
@@ -127,14 +130,17 @@ def outputToFile(filename, option):
     global yComponent_option2
     global yComponent_option3
     global yComponent_option4
+    global absError
 
+    absError = 0
     if option == 1:
         # Output to File
         with open(filename, 'w') as f:
             f.write(repr(yComponent))
         # Print Info
-        for row in yComponent:
-            print row
+        print("Absolute Error is {0}".format(absError))
+        # for row in yComponent:
+        #     print row
     if option == 2:
         # Encode
         computeInfoOption2()
@@ -142,8 +148,9 @@ def outputToFile(filename, option):
         with open(filename, 'w') as f:
             f.write(repr(yComponent_option2))
         # Print Info
-        for row in yComponent_option2:
-            print row
+        print("Absolute Error is {0}".format(abs(absError)))
+        # for row in yComponent_option2:
+        #     print row
 
     if option == 3:
         # Encode
@@ -152,8 +159,9 @@ def outputToFile(filename, option):
         with open(filename, 'w') as f:
             f.write(repr(yComponent_option3))
         #Print Info
-        for row in yComponent_option3:
-            print row
+        print("Absolute Error is {0}".format(abs(absError)))
+        # for row in yComponent_option3:
+        #     print row
 
     if option == 4:
         # Encode
@@ -162,14 +170,15 @@ def outputToFile(filename, option):
         with open(filename, 'w') as f:
             f.write(repr(yComponent_option4))
         #Print Info
-        for row in yComponent_option4:
-            print row
+        print("Absolute Error is {0}".format(abs(absError)))
+        # for row in yComponent_option4:
+        #     print row
 
 
 def computeInfoOption2():
     global yComponent
     global yComponent_option2
-    global option2_absoluteDiff
+    global absError
 #     S[t] = S[t-1]
     row_index = 0
     for row in yComponent:
@@ -179,7 +188,7 @@ def computeInfoOption2():
                 yComponent_option2[row_index]=[item]
             else:
                 value = int(item) - int(yComponent[row_index][col_index-1])
-                option2_absoluteDiff += value
+                absError += value
                 yComponent_option2[row_index].append(value)
             col_index += 1
         row_index += 1
@@ -188,6 +197,7 @@ def computeInfoOption2():
 def computeInfoOption3():
     global yComponent
     global yComponent_option3
+    global absError
 #     S[t] = (S[t-1] + S[t-2]) / 2
     row_index = 0
     for row in yComponent:
@@ -198,8 +208,9 @@ def computeInfoOption3():
             elif col_index == 1:
                 yComponent_option3[row_index].append(item)
             else:
-                value = (int(yComponent[row_index][col_index-1]) + int(yComponent[row_index][col_index-2]))/2
+                value = (int(yComponent[row_index][col_index-1]) + int(yComponent[row_index][col_index-2]))/float(2)
                 value = int(item) - value
+                absError += value
                 yComponent_option3[row_index].append(value)
             col_index += 1
         row_index += 1
@@ -208,6 +219,7 @@ def computeInfoOption3():
 def computeInfoOption4():
     global yComponent
     global yComponent_option4
+    global absError
 
     row_index = 0
     for row in yComponent:
@@ -220,6 +232,7 @@ def computeInfoOption4():
             elif col_index < 4:
                 value = (0.5 * int(yComponent[row_index][col_index-1]) + 0.5 * int(yComponent[row_index][col_index-2]))
                 value = int(item) - value
+                absError += value;
                 yComponent_option4[row_index].append(value)
             else:
                 alpha = computeAlpha1(yComponent[row_index][col_index-1],yComponent[row_index][col_index-2], yComponent[row_index][col_index-3], yComponent[row_index][col_index-4])
@@ -228,6 +241,7 @@ def computeInfoOption4():
 
                 value = (alpha * int(yComponent[row_index][col_index-1]) + (1-alpha) * int(yComponent[row_index][col_index-2]))
                 value = int(item) - value
+                absError += value;
                 yComponent_option4[row_index].append(value)
             col_index += 1
         row_index += 1
@@ -235,15 +249,50 @@ def computeInfoOption4():
 def computeAlpha1(s1,s2,s3,s4):
     if int(s2) - int(s4) == 0 :
         return 0.5
-    return (int(s1)+int(s3)-int(s3)-int(s4))/(int(s2)-int(s4))
+    alpha = (int(s1)+int(s3)-int(s3)-int(s4))/float((int(s2)-int(s4)))
+    if(alpha < 0) or (alpha > 1):
+        return 0.5
+    else:
+        return alpha
 
 def logPrinter(message):
     return
     print message
 
-# way to read the files
-# with open('tem2.txt') as f:
-#     list2 = eval(f.read())
+def decoder(option):
+    # way to read the files
+    with open('tem2.txt') as f:
+        list = eval(f.read())
+        count = 0
+        for item in list:
+            if(count == 0):
+                decodedList = np.array(item)
+            else:
+                decodedList.ap
 
+def writeToVideo(videofile):
+    cap = cv2.VideoCapture(videofile)
+
+    framespersecond = cap.get(cv2.cv.CV_CAP_PROP_FPS)
+    frameheight = cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
+    framewidth = cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
+    framecount = cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT)
+    framefourcc = cap.get(cv2.cv.CV_CAP_PROP_FOURCC)
+    print("FPS {0}, Width {1}, Height {2}, Count {3}, FourCC {4}".format(framespersecond,framewidth,frameheight,
+                                                                         framecount,framefourcc))
+    video123 = ""
+    #828601953
+    video123 = cv2.VideoWriter("/Users/rahulkrsna/Documents/ASU_Fall2015/MIS/HW-2/File1.mp4",framefourcc,framespersecond,
+                               (framewidth,frameheight))
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if ret == True:
+            video123.write(frame)
+        else:
+            pass
+
+
+    # video123.write(frame)
+    # video123.release()
 if __name__ == '__main__':
     main()
