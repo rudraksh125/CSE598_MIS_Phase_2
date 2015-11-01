@@ -101,15 +101,12 @@ def main():
     while True:
         option = raw_input("Select option:  "
                            "\n 1: View file"
-                           "\n 2: Enter another filename: "
-                           "\n 3: Exit"
+                           "\n 2: Exit"
                            "\n ..? ")
 
-        if option == "3":
+        if option == "2":
             print("/******************************END*********************************/")
             break
-        elif option == "2":
-            path = raw_input("Enter .tpv or .spv filename: ")
         elif option == "1":
             print("\n/****************************************************************/\n")
             file_c = path.rsplit("_", 1)
