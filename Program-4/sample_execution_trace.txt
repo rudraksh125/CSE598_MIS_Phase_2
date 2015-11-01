@@ -1,0 +1,87 @@
+/usr/bin/python /Users/kvivekanandan/Desktop/ASU/CSE_598_Multimedia_Information_Systems/Project/MIS_Phase_2/Program-4/compress.py
+Enter .tpq or .spq filename: ../2_1_1.spq
+Select encoding scheme:  
+ 1: No compression
+ 2: Shannon-Fano coding
+ 3: LZW coding
+ 4: Arithmetic coding
+ 5: 5 
+ ..? 1
+
+/****************************************************************/
+
+fileName: ../2_1_1_1.spv
+option: 1
+Size of input file in bytes: 
+308017
+Size of output file (../2_1_1_1.spv) in bytes: 
+308017
+
+/****************************************************************/
+
+Select encoding scheme:  
+ 1: No compression
+ 2: Shannon-Fano coding
+ 3: LZW coding
+ 4: Arithmetic coding
+ 5: 5 
+ ..? 2
+
+/****************************************************************/
+
+fileName: ../2_1_1_2.spv
+option: 2
+Size of input file in bytes:  308017
+Size of compressed putput file (../2_1_1_2.spv) in bytes: 
+162083
+
+/****************************************************************/
+
+Select encoding scheme:  
+ 1: No compression
+ 2: Shannon-Fano coding
+ 3: LZW coding
+ 4: Arithmetic coding
+ 5: 5 
+ ..? 3
+
+/****************************************************************/
+
+fileName: ../2_1_1_3.spv
+option: 3
+Size of input file in bytes: 
+308017
+Size of compressed putput file (../2_1_1_3.spv) in bytes: 
+29820
+
+/****************************************************************/
+
+Select encoding scheme:  
+ 1: No compression
+ 2: Shannon-Fano coding
+ 3: LZW coding
+ 4: Arithmetic coding
+ 5: 5 
+ ..? 4
+
+/****************************************************************/
+
+fileName: ../2_1_1_4.spv
+option: 4
+Size of input file in bytes: 
+308017
+Size of compressed putput file (../2_1_1_4.spv) in bytes: 
+109831
+
+/****************************************************************/
+
+Select encoding scheme:  
+ 1: No compression
+ 2: Shannon-Fano coding
+ 3: LZW coding
+ 4: Arithmetic coding
+ 5: 5 
+ ..? 5
+/******************************END*********************************/
+
+Process finished with exit code 0
