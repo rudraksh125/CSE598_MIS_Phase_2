@@ -8,7 +8,9 @@ def Coding(cap, top_left_x, top_left_y, choice):
     error = 0
     if(choice == 1):
         frame_index = 0
-        outfile = open("D:\YuhanSun\\598\\Phase2\{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
+        # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
+        outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
+
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -22,7 +24,8 @@ def Coding(cap, top_left_x, top_left_y, choice):
                 break
     elif(choice == 2):
         frame_index = 0
-        outfile = open("D:\YuhanSun\\598\\Phase2\{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
+        # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
+        outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -46,7 +49,8 @@ def Coding(cap, top_left_x, top_left_y, choice):
                 break
     elif(choice == 3):
         frame_index = 0
-        outfile = open("D:\YuhanSun\\598\\Phase2\{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
+        # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
+        outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -70,7 +74,8 @@ def Coding(cap, top_left_x, top_left_y, choice):
                 break
     elif(choice ==4 ):
         frame_index = 0
-        outfile = open("D:\YuhanSun\\598\\Phase2\{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
+        # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
+        outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -97,7 +102,8 @@ def Coding(cap, top_left_x, top_left_y, choice):
                 break
     elif(choice ==5 ):
         frame_index = 0
-        outfile = open("D:\YuhanSun\\598\\Phase2\{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
+        # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
+        outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -122,7 +128,6 @@ def Coding(cap, top_left_x, top_left_y, choice):
                 frame_index+=1
             else:
                 break
-    outfile.write("#Prediction error is "+str(error))
     outfile.close()
 
     print "\n### File saved as {0}_{1}.spc ###".format(filename.split(".")[0], choice)
@@ -131,9 +136,11 @@ def Coding(cap, top_left_x, top_left_y, choice):
 def main():
 
     print("### Spatial Predictive Coding [SPC] ###\n")
+    # global filepath
     global filename
     global frameStartX
     global frameStartY
+    # filepath = "D:\YuhanSun\\598\Phase2\\"
     while(1):
         filename = raw_input("Enter the make of the video file: ")
 
@@ -148,9 +155,11 @@ def main():
 
         print("\n### Calculating the encoding ###")
 
-        videoFile = 'D:\YuhanSun\\598\\{0}'.format(filename)
+        # print filepath
+        # videoFile = '{0}{1}'.format(filepath,filename)
+        videoFile = filename
         cap = cv2.VideoCapture(videoFile)
-        Coding(cap, frameStartX, frameStartY, 5)
+        Coding(cap, frameStartX, frameStartY, choice)
 
         user_input = raw_input("\nDo you want to continue Y/N: ")
         if(user_input.__eq__('N')):
