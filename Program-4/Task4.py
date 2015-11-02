@@ -3,7 +3,6 @@ __author__ = 'kvivekan'
 import os
 import lzw
 import arcode
-import cv2
 from sys import platform as _platform
 
 yComponent = [None] * (10 * 10)
@@ -50,53 +49,6 @@ def main():
             print("\n/****************************************************************/\n")
         else:
             print("Choosen option is not valid \n")
-
-# def distortion(dist_file, input_file_pq):
-#     lines = ""
-#     with open(dist_file) as f:
-#         lines =  [x.rstrip('\n') for x in f.readlines()]
-#
-#     coord = lines[0].split(",")
-#     x = int(coord[0])
-#     y = int(coord[1])
-#     input_video_file = lines[1]
-#
-#     cap = cv2.VideoCapture(input_video_file)
-#
-#     frameNumber=0
-#     while cap.isOpened():
-#         ret, frame = cap.read()
-#         if ret == True:
-#             #Extract a portion of frame
-#             tImage = frame[x:x+10, y:y+10]
-#             createSignalList(tImage,frameNumber)
-#             frameNumber += 1
-#         else:
-#             cap.release()
-#     print frameNumber
-
-    # computeDistortion()
-
-
-# Creates a Signal list for every frame
-# def createSignalList(input_image, frameNumber):
-#     global yComponent
-#
-#     #Convert to YUV image
-#     yuvImage = cv2.cvtColor(input_image,cv2.COLOR_BGR2YUV)
-#     y,u,v = cv2.split(yuvImage)
-#     index=0
-#
-#     for row in y:
-#         for col in row:
-#             if frameNumber == 0:
-#                 yComponent[index]=[col]
-#             else:
-#                 yComponent[index].append(col)
-#             index+=1
-#
-#     print(len(yComponent))
-#     print('signal list')
 
 def shannon_fano_encoder(iA, iB): # iA to iB : index interval
     global tupleList

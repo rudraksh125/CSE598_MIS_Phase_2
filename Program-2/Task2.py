@@ -10,7 +10,7 @@ def Coding(cap, top_left_x, top_left_y, choice):
         frame_index = 0
         # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
         outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
-
+        ofile_ori = open("{0}_original.spc".format(filename.split(".")[0]),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -19,6 +19,10 @@ def Coding(cap, top_left_x, top_left_y, choice):
                 rows, cols = yuv.shape
                 outfile.write('# Frame: {0}\n'.format(frame_index))
                 np.savetxt(outfile, yuv, fmt='%-7.2f')
+
+                ofile_ori.write('# Frame: {0}\n'.format(frame_index))
+                np.savetxt(ofile_ori, yuv, fmt='%-7.2f')
+
                 frame_index+=1
             else:
                 break
@@ -26,6 +30,7 @@ def Coding(cap, top_left_x, top_left_y, choice):
         frame_index = 0
         # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
         outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
+        ofile_ori = open("{0}_original.spc".format(filename.split(".")[0]),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -44,6 +49,10 @@ def Coding(cap, top_left_x, top_left_y, choice):
 
                 outfile.write('# Frame: {0}\n'.format(frame_index))
                 np.savetxt(outfile, compress_yuv, fmt='%-7.2f')
+
+                ofile_ori.write('# Frame: {0}\n'.format(frame_index))
+                np.savetxt(ofile_ori, yuv, fmt='%-7.2f')
+
                 frame_index+=1
             else:
                 break
@@ -51,6 +60,7 @@ def Coding(cap, top_left_x, top_left_y, choice):
         frame_index = 0
         # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
         outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
+        ofile_ori = open("{0}_original.spc".format(filename.split(".")[0]),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -69,6 +79,10 @@ def Coding(cap, top_left_x, top_left_y, choice):
 
                 outfile.write('# Frame: {0}\n'.format(frame_index))
                 np.savetxt(outfile, compress_yuv, fmt='%-7.2f')
+
+                ofile_ori.write('# Frame: {0}\n'.format(frame_index))
+                np.savetxt(ofile_ori, yuv, fmt='%-7.2f')
+
                 frame_index+=1
             else:
                 break
@@ -76,6 +90,7 @@ def Coding(cap, top_left_x, top_left_y, choice):
         frame_index = 0
         # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
         outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
+        ofile_ori = open("{0}_original.spc".format(filename.split(".")[0]),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -97,6 +112,10 @@ def Coding(cap, top_left_x, top_left_y, choice):
 
                 outfile.write('# Frame: {0}\n'.format(frame_index))
                 np.savetxt(outfile, compress_yuv, fmt='%-7.2f')
+
+                ofile_ori.write('# Frame: {0}\n'.format(frame_index))
+                np.savetxt(ofile_ori, yuv, fmt='%-7.2f')
+
                 frame_index+=1
             else:
                 break
@@ -104,6 +123,7 @@ def Coding(cap, top_left_x, top_left_y, choice):
         frame_index = 0
         # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
         outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
+        ofile_ori = open("{0}_original.spc".format(filename.split(".")[0]),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -125,6 +145,10 @@ def Coding(cap, top_left_x, top_left_y, choice):
 
                 outfile.write('# Frame: {0}\n'.format(frame_index))
                 np.savetxt(outfile, compress_yuv, fmt='%-7.2f')
+
+                ofile_ori.write('# Frame: {0}\n'.format(frame_index))
+                np.savetxt(ofile_ori, yuv, fmt='%-7.2f')
+
                 frame_index+=1
             else:
                 break
@@ -133,8 +157,11 @@ def Coding(cap, top_left_x, top_left_y, choice):
     print "\n### File saved as {0}_{1}.spc ###".format(filename.split(".")[0], choice)
 
     print "\nPrediction error is "+str(error)
-def main():
 
+def main():
+    # videoFile = "2.mp4"
+    # cap = cv2.VideoCapture(videoFile)
+    # print cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT)
     print("### Spatial Predictive Coding [SPC] ###\n")
     # global filepath
     global filename

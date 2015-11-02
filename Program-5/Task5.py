@@ -5,8 +5,8 @@ import os
 import cv2
 import numpy
 import re
-import sys
-sys.path.append('../Program-4/')
+# import sys
+# sys.path.append('../Program-4/')
 import lzw
 from sys import platform as _platform
 
@@ -96,7 +96,7 @@ def main():
         slash = '\\'
 
     input_file = open(path, 'r')
-    print input_file.read()
+    # print input_file.read()
 
     while True:
         option = raw_input("Select option:  "
@@ -127,55 +127,34 @@ def main():
 
             output_file = temp_decoded_file_name[0] + "." + file_extension
             predictive_coding_option = temp_decoded_file_name[0].rsplit("_",1)[1]
-            decode(int(predictive_coding_option), temp_output_file, output_file)
+
+            if "spv" in file_extension:
+                decode_spc(int(predictive_coding_option), temp_output_file, output_file)
+            else:
+                decode_tpc()
 
             view(output_file, file_extension)
+
+            print "calculating distortion: "
+            if "spv" in file_extension:
+                original_file = temp_output_file.split("_")[0] + "_original.spc"
+                distortion_spc(original_file ,temp_output_file)
+            else:
+                original_file = temp_output_file.split("_")[0] + "_1.tpc"
+                distortion_tpc(original_file ,temp_output_file, "tpc")
+
 
             print("\n/****************************************************************/\n")
         else:
             print("Chosen option is not valid \n")
 
+def decode_tpc():
+    pass
+
 def combine_tpv(input_file_name):
-    with open(input_file_name) as f:
-        list2 = eval(f.read())
 
-    row_length = 3
-    col_length = 3
-
-    numpy.set_printoptions(threshold='nan')
-    frames=numpy.array([numpy.array(xi) for xi in list2])
-    print frames
-
-    frames = numpy.transpose(frames)
-    # print "transpose "
-    # print frames
+    window = construct_tp_frames(input_file_name)
     count = 0
-    window = []
-    for i in range(len(frames)):
-        l = []
-        r = []
-        for j in range(len(frames[i])):
-            if j == 0:
-                t = frames[i][j],0,0
-                l.append(numpy.array((t)))
-                continue
-            if j%col_length == 0:
-                # print "\n"
-                # print frames[i][j],
-                r.append(l)
-                l = []
-                t = frames[i][j],0,0
-                l.append(numpy.array((t)).astype(numpy.uint8))
-            else:
-                t = frames[i][j],0,0
-                l.append(numpy.array((t)).astype(numpy.uint8))
-        r.append(numpy.array(l).astype(numpy.uint8))
-        window.append(numpy.array(r).astype(numpy.uint8))
-
-    # for i in range(len(window)):
-    #     print "frame #: " + str(i)
-    #     print window[i]
-
     for ff in window:
         if len(ff)>0:
             cv2.imshow('video', ff)
@@ -186,33 +165,12 @@ def combine_tpv(input_file_name):
             count+=1
             yframes = cv2.cvtColor(ff, cv2.COLOR_YUV2BGR)
             cv2.imwrite(name, yframes)
-    print "tst"
+    print "saved images"
 
 def combine_spv(input_file_name):
-    fframe = []
+
+    fframe = construct_sp_frames(input_file_name)
     count = 0
-    # with open('../Program-4/2_1_1_1.spv') as f:
-    with open(input_file_name) as f:
-        lines =  [x.rstrip('\n') for x in f.readlines()]
-    frames = []
-    r = []
-    for i in range(len(lines)):
-        r = []
-        if not "#" in lines[i]:
-            line = re.sub('\s+', ',', lines[i]).strip()
-            word = line.split(',')
-            for w in word:
-                if '\n' not in w and len(w)>0:
-                    pixel = int(float(w)),0,0
-                    p = numpy.array(pixel, dtype= numpy.uint8)
-                    # r.append(numpy.array(pixel).astype(numpy.uint8))
-                    r.append(p)
-            frames.append(numpy.array(r).astype(numpy.uint8))
-        else:
-            if len(frames)>0:
-                fframe.append(numpy.array(frames).astype(numpy.uint8))
-                frames = []
-    fframe.append(numpy.array(frames).astype(numpy.uint8))
 
     for ff in fframe:
         if len(ff)>0:
@@ -224,33 +182,14 @@ def combine_spv(input_file_name):
             count+=1
             yframes = cv2.cvtColor(ff, cv2.COLOR_YUV2BGR)
             cv2.imwrite(name, yframes)
-    print "tst"
+    print "saved images"
 
-def decode(compression_option, input_dc_file, output_file):
-    fframe = []
+def decode_spc(compression_option, input_dc_file, output_file):
+    fframe = construct_sp_frames(input_dc_file)
     count = 0
-    with open(input_dc_file) as f:
-        lines =  [x.rstrip('\n') for x in f.readlines()]
-    frames = []
-    r = []
-    for i in range(len(lines)):
-        r = []
-        if not "#" in lines[i]:
-            line = re.sub('\s+', ',', lines[i]).strip()
-            word = line.split(',')
-            for w in word:
-                if '\n' not in w and len(w)>0:
-                    pixel = int(float(w)),0,0
-                    r.append(numpy.array(pixel))
-            frames.append(numpy.array(r))
-        else:
-            if len(frames)>0:
-                fframe.append(numpy.array(frames))
-                frames = []
-    fframe.append(numpy.array(frames))
 
     mat = numpy.ndarray((fframe.__len__(),10,10), dtype = float, order = 'F')
-    print fframe.__len__()
+    # print fframe.__len__()
     for frame_index in range(0, fframe.__len__()):
         for i in range(0, 10):
             for j in range(0, 10):
@@ -314,6 +253,152 @@ def decode(compression_option, input_dc_file, output_file):
         numpy.savetxt(outfile, frame, fmt='%-7.2f')
         frame_index+=1
 
+def distortion_tpc(original_filename, input_dc_file):
+
+    originalFrames = construct_tp_frames(original_filename)
+    decodedFrames = construct_tp_frames(input_dc_file)
+#     TODO
+
+def construct_tp_frames(file_name):
+    with open(file_name) as f:
+        list2 = eval(f.read())
+
+    row_length = 3
+    col_length = 3
+
+    numpy.set_printoptions(threshold='nan')
+    frames=numpy.array([numpy.array(xi) for xi in list2])
+    print frames
+
+    frames = numpy.transpose(frames)
+    window = []
+    for i in range(len(frames)):
+        l = []
+        r = []
+        for j in range(len(frames[i])):
+            if j == 0:
+                t = frames[i][j],0,0
+                l.append(numpy.array((t)))
+                continue
+            if j%col_length == 0:
+                r.append(l)
+                l = []
+                t = frames[i][j],0,0
+                l.append(numpy.array((t)).astype(numpy.uint8))
+            else:
+                t = frames[i][j],0,0
+                l.append(numpy.array((t)).astype(numpy.uint8))
+        r.append(numpy.array(l).astype(numpy.uint8))
+        window.append(numpy.array(r).astype(numpy.uint8))
+
+
+def construct_sp_frames(file_name):
+    fframe = []
+    with open(file_name) as f:
+        lines =  [x.rstrip('\n') for x in f.readlines()]
+    frames = []
+    r = []
+    for i in range(len(lines)):
+        r = []
+        if not "#" in lines[i]:
+            line = re.sub('\s+', ',', lines[i]).strip()
+            word = line.split(',')
+            for w in word:
+                if '\n' not in w and len(w)>0:
+                    pixel = int(float(w)),0,0
+                    p = numpy.array(pixel, dtype= numpy.uint8)
+                    r.append(p)
+            frames.append(numpy.array(r).astype(numpy.uint8))
+        else:
+            if len(frames)>0:
+                fframe.append(numpy.array(frames).astype(numpy.uint8))
+                frames = []
+    fframe.append(numpy.array(frames).astype(numpy.uint8))
+    return fframe
+
+def distortion_spc(original_filename, input_dc_file):
+
+    fframe = construct_sp_frames(original_filename)
+
+    exact_original_mat = numpy.ndarray((fframe.__len__(),10,10), dtype = float, order = 'F')
+    # print fframe.__len__()
+    for frame_index in range(0, fframe.__len__()):
+        for i in range(0, 10):
+            for j in range(0, 10):
+                exact_original_mat[frame_index,i,j] = fframe[frame_index][i][j][0]
+
+    fframe = construct_sp_frames(input_dc_file)
+
+    mat = numpy.ndarray((fframe.__len__(),10,10), dtype = float, order = 'F')
+    # print fframe.__len__()
+    for frame_index in range(0, fframe.__len__()):
+        for i in range(0, 10):
+            for j in range(0, 10):
+                if len(fframe[frame_index])>0:
+                    mat[frame_index,i,j] = fframe[frame_index][i][j][0]
+
+    original_mat = numpy.ndarray((fframe.__len__(),10,10), dtype = float, order = 'F')
+
+    compression_option = int(input_dc_file.split("_")[1])
+    if(compression_option == 1):
+        for frame_index in range(0, fframe.__len__()):
+            for i in range(0, 10):
+                for j in range(0,10):
+                    original_mat[frame_index,i,j] = mat[frame_index,i,j]
+
+    elif(compression_option == 2):
+        for frame_index in range(0, fframe.__len__()):
+            for i in range (0, 10):
+                original_mat[frame_index, i, 0] = mat[frame_index, i,0]
+
+            for i in range (0, 10):
+                for j in range(1, 10):
+                    original_mat[frame_index, i, j] = float(mat[frame_index, i, j]) + float(original_mat[frame_index, i,j-1])
+
+    elif(compression_option == 3):
+        for frame_index in range(0, fframe.__len__()):
+            for j in range (0, 10):
+                original_mat[frame_index, 0, j] = mat[frame_index, 0,j]
+
+            for i in range (1, 10):
+                    for j in range(0, 10):
+                        original_mat[frame_index, i, j] = float(mat[frame_index, i, j]) + float(original_mat[frame_index, i-1,j])
+
+    elif(compression_option == 4):
+        for frame_index in range(0, fframe.__len__()):
+            for j in range (0, 10):
+                original_mat[frame_index, 0, j] = mat[frame_index, 0,j]
+
+            for i in range(0, 10):
+                original_mat[frame_index, i, 0] = mat[frame_index, i,0]
+
+            for i in range (1, 10):
+                for j in range(1, 10):
+                    original_mat[frame_index, i, j] = float(mat[frame_index, i, j]) + float(original_mat[frame_index, i-1,j-1])
+
+    elif(compression_option == 5):
+        for frame_index in range(0, fframe.__len__()):
+            for j in range (0, 10):
+                original_mat[frame_index, 0, j] = mat[frame_index, 0,j]
+
+            for i in range(0, 10):
+                original_mat[frame_index, i, 0] = mat[frame_index, i,0]
+
+            for i in range (1, 10):
+                for j in range(1, 10):
+                        original_mat[frame_index, i, j] = float(mat[frame_index, i, j]) + 1.0/3*(float(original_mat[frame_index, i-1,j-1])+float(original_mat[frame_index, i-1, j]+float(original_mat[frame_index, i, j-1])))
+
+    p_signal = 0.0
+    p_noise = 0.0
+    for frame_index in range(0, fframe.__len__()):
+        for i in range(0, 10):
+            for j in range(0, 10):
+                p_signal+=exact_original_mat[frame_index,i,j]*exact_original_mat[frame_index,i,j]
+                p_noise+=(exact_original_mat[frame_index,i,j] - original_mat[frame_index, i, j])*(exact_original_mat[frame_index,i,j] - original_mat[frame_index, i, j])
+    if(abs(p_noise)<0.00000001):
+        print "there is no error"
+    else:
+        print (p_signal/p_noise)
 
 def combine(ext, output):
     # Arguments
