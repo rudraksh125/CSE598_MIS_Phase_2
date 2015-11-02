@@ -10,7 +10,7 @@ def Coding(cap, top_left_height, top_left_width, choice):
         frame_index = 0
         # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
         outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
-        ofile_ori = open("{0}_original.spc".format(filename.split(".")[0]),'w')
+        ofile_ori = open("{0}_{1}_original.spc".format(filename.split(".")[0], choice),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -30,7 +30,7 @@ def Coding(cap, top_left_height, top_left_width, choice):
         frame_index = 0
         # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
         outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
-        ofile_ori = open("{0}_original.spc".format(filename.split(".")[0]),'w')
+        ofile_ori = open("{0}_{1}_original.spc".format(filename.split(".")[0], choice),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -60,7 +60,7 @@ def Coding(cap, top_left_height, top_left_width, choice):
         frame_index = 0
         # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
         outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
-        ofile_ori = open("{0}_original.spc".format(filename.split(".")[0]),'w')
+        ofile_ori = open("{0}_{1}_original.spc".format(filename.split(".")[0], choice),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -90,7 +90,7 @@ def Coding(cap, top_left_height, top_left_width, choice):
         frame_index = 0
         # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
         outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
-        ofile_ori = open("{0}_original.spc".format(filename.split(".")[0]),'w')
+        ofile_ori = open("{0}_{1}_original.spc".format(filename.split(".")[0], choice),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):
@@ -123,7 +123,7 @@ def Coding(cap, top_left_height, top_left_width, choice):
         frame_index = 0
         # outfile = open("{2}{0}_{1}.spc".format(filename.split(".")[0], choice, filepath),'w')
         outfile = open("{0}_{1}.spc".format(filename.split(".")[0], choice),'w')
-        ofile_ori = open("{0}_original.spc".format(filename.split(".")[0]),'w')
+        ofile_ori = open("{0}_{1}_original.spc".format(filename.split(".")[0], choice),'w')
         while(cap.isOpened):
             ret, frame = cap.read()
             if(ret):

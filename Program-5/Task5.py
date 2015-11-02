@@ -139,7 +139,7 @@ def main():
 
             print "calculating distortion: "
             if "spv" in file_extension:
-                original_file = temp_output_file.rsplit("_",4)[0] + "_original.spc"
+                original_file = temp_output_file.rsplit("_",3)[0] + "_original.spc"
                 distortion_spc(original_file ,temp_output_file)
             else:
                 original_file = temp_output_file.rsplit("_",4)[0] + "_1.tpc"
