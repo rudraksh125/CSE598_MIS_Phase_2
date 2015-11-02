@@ -45,7 +45,9 @@ def main():
     videoFileName = raw_input('Enter the video file name <v>: ')
     videoFilePath = path+videoFileName
     height = raw_input('Start Point in Height <number>: ')
-    width = raw_input('Start Point in Height <number>: ')
+    height = int(height)
+    width = raw_input('Start Point in Width <number>: ')
+    width = int(width)
     extractFrames()
     outputToFile(videoFilePath.split(".")[0]+"_"+"1.tpc", 1)
 
