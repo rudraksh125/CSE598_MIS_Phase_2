@@ -8,6 +8,8 @@ import re
 # import sys
 # sys.path.append('../Program-4/')
 import lzw
+import scipy.stats
+from sklearn.metrics import mean_squared_error
 from sys import platform as _platform
 
 def bitReader(n): # number of bits to read
@@ -141,7 +143,7 @@ def main():
                 distortion_spc(original_file ,temp_output_file)
             else:
                 original_file = temp_output_file.split("_")[0] + "_1.tpc"
-                distortion_tpc(original_file ,temp_output_file, "tpc")
+                distortion_tpc(original_file ,temp_output_file)
 
 
             print("\n/****************************************************************/\n")
@@ -398,7 +400,22 @@ def distortion_spc(original_filename, input_dc_file):
     if(abs(p_noise)<0.00000001):
         print "there is no error"
     else:
+        print "Total error squared / total noise squared error:"
         print (p_signal/p_noise)
+
+    print "SNR: (mean / standard deviation)"
+    snr = scipy.stats.signaltonoise(original_mat,axis = None)
+    print snr
+
+    # print "mean squared error:"
+    # mse = ((exact_original_mat - original_mat) ** 2).mean(axis=None)
+    # print mse
+    #
+    # print "sklearn mean squared error:"
+    # mse = mean_squared_error(exact_original_mat, original_mat)
+    # print mse
+
+
 
 def combine(ext, output):
     # Arguments
