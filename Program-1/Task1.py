@@ -1,13 +1,11 @@
 __author__ = 'rahulkrsna'
 
 import cv2
-import numpy as np
-import pickle
 from sys import platform as _platform
 
 
-frameStartX = 100
-frameStartY = 100
+width = 100
+height = 100
 row_length = 10
 col_length = 10
 yComponent = [None] * (row_length * row_length)
@@ -22,12 +20,15 @@ path = ""
 videoFilePath = ""
 absError = 0
 
+
 def main():
 
     global yComponent
     global videoFileName
     global path
     global videoFilePath
+    global width
+    global height
 
     #capture frame numbers as input.
     path = raw_input("Enter the Path of Folder containing video Files: ")
@@ -43,7 +44,10 @@ def main():
 
     videoFileName = raw_input('Enter the video file name <v>: ')
     videoFilePath = path+videoFileName
+    height = raw_input('Start Point in Height <number>: ')
+    width = raw_input('Start Point in Height <number>: ')
     extractFrames()
+    outputToFile(videoFilePath.split(".")[0]+"_"+"1.tpc", 1)
 
     while True:
         option = raw_input("Chose a Predictive Coding Option "
@@ -69,6 +73,8 @@ def main():
 # Extracts Frames and Saves the partial frame information
 def extractFrames():
     global videoFilePath
+    global width
+    global height
     # videoFilePath = '/Users/rahulkrsna/Documents/ASU_Fall2015/MIS/HW-2/1.mp4'
 
     cap = cv2.VideoCapture(videoFilePath)
@@ -80,7 +86,7 @@ def extractFrames():
 
         if ret == True:
             #Extract a portion of frame
-            tImage = frame[frameStartY:frameStartY+row_length, frameStartX:frameStartX+col_length]
+            tImage = frame[height:height+row_length, width:width+col_length]
             createSignalList(tImage,frameNumber)
             frameNumber += 1
         else:
@@ -103,7 +109,7 @@ def createSignalList(input_image, frameNumber):
 
     logPrinter('#1')
     #Convert to YUV image
-    yuvImage = cv2.cvtColor(input_image,cv2.COLOR_BGR2YUV)
+    yuvImage = cv2.cvtColor(input_image, cv2.COLOR_BGR2YUV)
     y,u,v = cv2.split(yuvImage)
     index=0
 
@@ -115,13 +121,14 @@ def createSignalList(input_image, frameNumber):
     for row in y:
         for col in row:
             if frameNumber == 0:
-                yComponent[index]=[col]
+                yComponent[index] = [col]
             else:
                 yComponent[index].append(col)
             index+=1
 
     logPrinter(len(yComponent))
     logPrinter('#2 - end')
+
 
 # This method computes the Predictive Coding Error values basing on the predictive function
 # Then outputs the error values to files.
@@ -185,9 +192,9 @@ def computeInfoOption2():
         col_index = 0
         for item in row:
             if col_index == 0:
-                yComponent_option2[row_index]=[item]
+                yComponent_option2[row_index] = [item]
             else:
-                value = int(item) - int(yComponent[row_index][col_index-1])
+                value = float(item) - float(yComponent[row_index][col_index-1])
                 absError += value
                 yComponent_option2[row_index].append(value)
             col_index += 1
@@ -208,8 +215,8 @@ def computeInfoOption3():
             elif col_index == 1:
                 yComponent_option3[row_index].append(item)
             else:
-                value = (int(yComponent[row_index][col_index-1]) + int(yComponent[row_index][col_index-2]))/float(2)
-                value = int(item) - value
+                value = (float(yComponent[row_index][col_index-1]) + float(yComponent[row_index][col_index-2]))/float(2)
+                value = float(item) - value
                 absError += value
                 yComponent_option3[row_index].append(value)
             col_index += 1
@@ -230,26 +237,27 @@ def computeInfoOption4():
             elif col_index == 1:
                 yComponent_option4[row_index].append(item)
             elif col_index < 4:
-                value = (0.5 * int(yComponent[row_index][col_index-1]) + 0.5 * int(yComponent[row_index][col_index-2]))
-                value = int(item) - value
+                value = (0.5 * float(yComponent[row_index][col_index-1]) + 0.5 * float(yComponent[row_index][col_index-2]))
+                value = float(item) - value
                 absError += value;
                 yComponent_option4[row_index].append(value)
             else:
-                alpha = computeAlpha1(yComponent[row_index][col_index-1],yComponent[row_index][col_index-2], yComponent[row_index][col_index-3], yComponent[row_index][col_index-4])
+                alpha = computeAlpha1(yComponent[row_index][col_index-1],yComponent[row_index][col_index-2],
+                                      yComponent[row_index][col_index-3], yComponent[row_index][col_index-4])
                 if alpha < 0 :
                     alpha = 0.5
 
-                value = (alpha * int(yComponent[row_index][col_index-1]) + (1-alpha) * int(yComponent[row_index][col_index-2]))
-                value = int(item) - value
+                value = (alpha * float(yComponent[row_index][col_index-1]) + (1-alpha) * float(yComponent[row_index][col_index-2]))
+                value = float(item) - value
                 absError += value;
                 yComponent_option4[row_index].append(value)
             col_index += 1
         row_index += 1
 
 def computeAlpha1(s1,s2,s3,s4):
-    if int(s2) - int(s4) == 0 :
+    if (float(s2) - float(s4)) == 0:
         return 0.5
-    alpha = (int(s1)+int(s3)-int(s3)-int(s4))/float((int(s2)-int(s4)))
+    alpha = (float(s1)+float(s3)-float(s3)-float(s4))/(float(s2)-float(s4))
     if(alpha < 0) or (alpha > 1):
         return 0.5
     else:
@@ -259,16 +267,7 @@ def logPrinter(message):
     return
     print message
 
-def decoder(option):
-    # way to read the files
-    with open('tem2.txt') as f:
-        list = eval(f.read())
-        count = 0
-        for item in list:
-            if(count == 0):
-                decodedList = np.array(item)
-            else:
-                decodedList.ap
+
 
 def writeToVideo(videofile):
     cap = cv2.VideoCapture(videofile)
