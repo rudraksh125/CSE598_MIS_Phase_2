@@ -37,12 +37,15 @@ def decode_tpc(option, ippath, oppath):
     global outputpath
 
     inputpath = ippath
-    outputpath = oppath
 
     # Get Input
     getinput(ippath)
 
+    # Decode
+    decoder(option)
 
+    #outpu
+    output(option, oppath)
 
 def getinput(path):
 
@@ -149,6 +152,38 @@ def computeInfoOption4():
             col_index += 1
         row_index += 1
 
+
+def output(option,outputpath):
+
+    global yComponent_option1
+    global yComponent_option2
+    global yComponent_option3
+    global yComponent_option4
+
+    if option == 1:
+        # Output to File
+        with open(outputpath, 'w') as f:
+            f.write(repr(yComponent_option1))
+    elif option == 2:
+        # Encode
+        computeInfoOption2()
+        # Output to File
+        with open(outputpath, 'w') as f:
+            f.write(repr(yComponent_option2))
+    elif option == 3:
+        # Encode
+        computeInfoOption3()
+        # Output to File
+        with open(outputpath, 'w') as f:
+            f.write(repr(yComponent_option3))
+    elif option == 4:
+        # Encode
+        computeInfoOption4()
+        # Output to File
+        with open(outputpath, 'w') as f:
+            f.write(repr(yComponent_option4))
+
+    print("Saved to " + outputpath)
 
 def computeAlpha1(s1, s2, s3, s4):
 

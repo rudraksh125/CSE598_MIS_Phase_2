@@ -3,6 +3,8 @@ import numpy as np
 
 
 numberofbits = 0
+lowervalue = -255
+highervalue = 255
 inputlist = None
 bins = None
 binvalues = {}
@@ -50,6 +52,9 @@ def calculateBins():
     range = max(1, 510/pow(2, numberofbits))
     bins = np.arange(-255, 255, range)
 
+    print ("Bins")
+    print bins
+
     index = 0
     value = -255
     while index <= bins.size :
@@ -57,6 +62,8 @@ def calculateBins():
         binvalues[index] = value
         value += float(510/pow(2, numberofbits))/2
         index += 1
+
+    print binvalues
 
 def quantize():
 
@@ -78,13 +85,12 @@ def output(option):
     global inputpath
 
     if option == '1':
-        outputpath = inputpath.split(".")[0] + "_{0}.".format(0) + inputpath.split(".")[1]
+        outputpath = inputpath.split(".")[0] + "_{0}.spq".format(0)
         with open(outputpath, 'w') as f:
             f.write(repr(inputlist))
         print("File saved as " + outputpath)
-
     elif option == '2':
-        outputpath = inputpath.split(".")[0] + "_{0}.".format(numberofbits) + inputpath.split(".")[1]
+        outputpath = inputpath.split(".")[0] + "_{0}.spq".format(numberofbits)
         with open(outputpath, 'w') as f:
             f.write(repr(outputList.tolist()))
         print("File saved as " + outputpath)
@@ -116,3 +122,10 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+'''
+/Users/rahulkrsna/Documents/ASU_Fall2015/MIS/HW-2/1_1.tpc
+/Users/rahulkrsna/Documents/ASU_Fall2015/MIS/HW-2/1_2.tpc
+/Users/rahulkrsna/Documents/ASU_Fall2015/MIS/HW-2/1_3.tpc
+/Users/rahulkrsna/Documents/ASU_Fall2015/MIS/HW-2/1_4.tpc
+'''

@@ -144,43 +144,27 @@ def outputToFile(filename, option):
         # Output to File
         with open(filename, 'w') as f:
             f.write(repr(yComponent))
-        # Print Info
-        print("Absolute Error is {0}".format(absError))
-        # for row in yComponent:
-        #     print row
-    if option == 2:
+    elif option == 2:
         # Encode
         computeInfoOption2()
         # Output to File
         with open(filename, 'w') as f:
             f.write(repr(yComponent_option2))
-        # Print Info
-        print("Absolute Error is {0}".format(abs(absError)))
-        # for row in yComponent_option2:
-        #     print row
-
-    if option == 3:
+    elif option == 3:
         # Encode
         computeInfoOption3()
         # Output to File
         with open(filename, 'w') as f:
             f.write(repr(yComponent_option3))
-        #Print Info
-        print("Absolute Error is {0}".format(abs(absError)))
-        # for row in yComponent_option3:
-        #     print row
-
-    if option == 4:
+    elif option == 4:
         # Encode
         computeInfoOption4()
         # Output to File
         with open(filename, 'w') as f:
             f.write(repr(yComponent_option4))
-        #Print Info
-        print("Absolute Error is {0}".format(abs(absError)))
-        # for row in yComponent_option4:
-        #     print row
 
+    print("Absolute Error is {0}".format(absError))
+    print("File Saved to "+filename)
 
 def computeInfoOption2():
     global yComponent
