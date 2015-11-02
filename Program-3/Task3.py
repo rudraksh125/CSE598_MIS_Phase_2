@@ -49,21 +49,21 @@ def calculateBins():
 
     bins = 0
     binvalues = {}
-    range = max(1, 510/pow(2, numberofbits))
-    bins = np.arange(-255, 255, range)
-
-    print ("Bins")
-    print bins
+    if numberofbits > 8:
+        range = 1
+        bins = np.arange(-255, 255, range)
+    else:
+        range = max(1, int(510/pow(2, numberofbits)))
+        bins = np.arange(-255, 255, range)
 
     index = 0
-    value = -255
+    value = float(-255)
     while index <= bins.size :
-        value += float(510/pow(2, numberofbits))/2
-        binvalues[index] = value
-        value += float(510/pow(2, numberofbits))/2
+        value += float(range)/2.0
+        binvalues[index] = float(value)
+        value += float(range)/2.0
         index += 1
 
-    print binvalues
 
 def quantize():
 
@@ -85,12 +85,12 @@ def output(option):
     global inputpath
 
     if option == '1':
-        outputpath = inputpath.split(".")[0] + "_{0}.spq".format(0)
+        outputpath = inputpath.split(".")[0] + "_{0}.tpq".format(0)
         with open(outputpath, 'w') as f:
             f.write(repr(inputlist))
         print("File saved as " + outputpath)
     elif option == '2':
-        outputpath = inputpath.split(".")[0] + "_{0}.spq".format(numberofbits)
+        outputpath = inputpath.split(".")[0] + "_{0}.tpq".format(numberofbits)
         with open(outputpath, 'w') as f:
             f.write(repr(outputList.tolist()))
         print("File saved as " + outputpath)
