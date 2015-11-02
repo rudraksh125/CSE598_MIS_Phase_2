@@ -6,7 +6,7 @@ import cv2
 import numpy
 import re
 # import sys
-# sys.path.append('../Program-4/')
+# sys.path.append('../Program-1/')
 import lzw
 import scipy.stats
 from sklearn.metrics import mean_squared_error
@@ -116,11 +116,11 @@ def main():
             if path.count(slash) > 0:
                 file_name = path.rsplit(slash,1)[1].rsplit(".",1)[0]
                 file_extension = path.rsplit(slash,1)[1].rsplit(".",1)[1]
-                temp_output_file = path.rsplit(slash,1)[1]+ slash + file_name + "_dc." + file_extension
+                temp_output_file = path.rsplit(slash,1)[0]+ slash + file_name + "_dc." + file_extension
             else:
                 file_name = path.rsplit(".",1)[0]
                 file_extension = path.rsplit(".",1)[1]
-                temp_output_file = file_name + "_dc." + file_extension
+                temp_output_file = str(file_name) + "_dc." + str(file_extension)
 
             decompress(compression_option,path, temp_output_file)
 
@@ -133,25 +133,22 @@ def main():
             if "spv" in file_extension:
                 decode_spc(int(predictive_coding_option), temp_output_file, output_file)
             else:
-                decode_tpc()
+                decode_tpc(int(predictive_coding_option),temp_output_file, output_file)
 
             view(output_file, file_extension)
 
             print "calculating distortion: "
             if "spv" in file_extension:
-                original_file = temp_output_file.split("_")[0] + "_original.spc"
+                original_file = temp_output_file.rsplit("_",4)[0] + "_original.spc"
                 distortion_spc(original_file ,temp_output_file)
             else:
-                original_file = temp_output_file.split("_")[0] + "_1.tpc"
-                distortion_tpc(original_file ,temp_output_file)
+                original_file = temp_output_file.rsplit("_",4)[0] + "_1.tpc"
+                distortion_tpc(original_file ,output_file)
 
 
             print("\n/****************************************************************/\n")
         else:
             print("Chosen option is not valid \n")
-
-def decode_tpc():
-    pass
 
 def combine_tpv(input_file_name):
 
@@ -261,16 +258,52 @@ def distortion_tpc(original_filename, input_dc_file):
     decodedFrames = construct_tp_frames(input_dc_file)
 #     TODO
 
+    exact_original_mat = numpy.ndarray((originalFrames.__len__(),10,10), dtype = float, order = 'F')
+
+
+    for frame_index in range(0, originalFrames.__len__()):
+        for i in range(0, 10):
+            for j in range(0, 10):
+                exact_original_mat[frame_index,i,j] = originalFrames[frame_index][i][j][0]
+
+
+    mat = numpy.ndarray((decodedFrames.__len__(),10,10), dtype = float, order = 'F')
+
+
+    for frame_index in range(0, decodedFrames.__len__()):
+        for i in range(0, 10):
+            for j in range(0, 10):
+                if len(decodedFrames[frame_index])>0:
+                    mat[frame_index,i,j] = decodedFrames[frame_index][i][j][0]
+
+    p_signal = 0.0
+    p_noise = 0.0
+    for frame_index in range(0, originalFrames.__len__()):
+        for i in range(0, 10):
+            for j in range(0, 10):
+                p_signal+=exact_original_mat[frame_index,i,j]*exact_original_mat[frame_index,i,j]
+                p_noise+=(exact_original_mat[frame_index,i,j] - mat[frame_index, i, j])*(exact_original_mat[frame_index,i,j] - mat[frame_index, i, j])
+    if(abs(p_noise)<0.00000001):
+        print "there is no error"
+    else:
+        print "Total error squared / total noise squared error:"
+        print (p_signal/p_noise)
+
+    print "SNR: (mean / standard deviation)"
+    snr = scipy.stats.signaltonoise(mat,axis = None)
+    print snr
+
+
 def construct_tp_frames(file_name):
     with open(file_name) as f:
         list2 = eval(f.read())
 
-    row_length = 3
-    col_length = 3
+    row_length = 10
+    col_length = 10
 
     numpy.set_printoptions(threshold='nan')
     frames=numpy.array([numpy.array(xi) for xi in list2])
-    print frames
+    # print frames
 
     frames = numpy.transpose(frames)
     window = []
@@ -280,19 +313,24 @@ def construct_tp_frames(file_name):
         for j in range(len(frames[i])):
             if j == 0:
                 t = frames[i][j],0,0
-                l.append(numpy.array((t)))
+                l.append(numpy.array((t)).astype(numpy.uint8))
                 continue
             if j%col_length == 0:
                 r.append(l)
                 l = []
                 t = frames[i][j],0,0
-                l.append(numpy.array((t)).astype(numpy.uint8))
+                p = numpy.array(t, dtype= numpy.uint8)
+                l.append(p)
             else:
                 t = frames[i][j],0,0
-                l.append(numpy.array((t)).astype(numpy.uint8))
-        r.append(numpy.array(l).astype(numpy.uint8))
-        window.append(numpy.array(r).astype(numpy.uint8))
-
+                p = numpy.array(t, dtype= numpy.uint8)
+                l.append(p)
+        k = numpy.array(l, dtype= numpy.uint8)
+        r.append(k)
+        # m = numpy.array(r).astype(numpy.uint8)
+        m = numpy.array(r, dtype= numpy.uint8)
+        window.append(m)
+    return window
 
 def construct_sp_frames(file_name):
     fframe = []
@@ -467,6 +505,179 @@ def view(temp_decoded_file, file_extension):
     elif 'tpv' in file_extension:
         combine_tpv(temp_decoded_file)
     combine('jpg','output_'+temp_decoded_file+'.mp4')
+
+inputlist = None
+row_length = 10
+col_length = 10
+yComponent_option1 = [None] * (row_length * row_length)
+yComponent_option2 = [None] * (row_length * row_length)
+yComponent_option3 = [None] * (row_length * row_length)
+yComponent_option4 = [None] * (row_length * row_length)
+outputpath = None
+
+def decode_tpc(option, ippath, oppath):
+
+    global inputpath
+    global outputpath
+
+    inputpath = ippath
+    outputpath = oppath
+
+    # Get Input
+    getinput(ippath)
+
+    # Decode
+    decoder(option)
+
+    #output
+    output(option, oppath)
+
+def getinput(path):
+
+    global inputlist
+    global yComponent_option1
+
+    # way to read the files
+    with open(path) as f:
+        inputlist = eval(f.read())
+
+
+def decoder(option):
+
+    global yComponent_option1
+    global  inputlist
+
+    if option == 1:
+        yComponent_option1 = inputlist
+    elif option == 2:
+        computeInfoOption2()
+
+    elif option == 3:
+        computeInfoOption3()
+
+    elif option == 4:
+        computeInfoOption4()
+
+    else:
+        print('Option Not Detected')
+
+
+def computeInfoOption2():
+
+
+    global inputlist
+    global yComponent_option2
+
+#     S[t] = S[t-1]
+    row_index = 0
+    for row in inputlist:
+        col_index = 0
+        for item in row:
+            if col_index == 0:
+                yComponent_option2[row_index]=[item]
+            else:
+                value = float(item) + float(yComponent_option2[row_index][col_index-1])
+                yComponent_option2[row_index].append(int(value))
+            col_index += 1
+        row_index += 1
+
+
+def computeInfoOption3():
+
+    global inputlist
+    global yComponent_option3
+
+#     S[t] = (S[t-1] + S[t-2]) / 2
+    row_index = 0
+    for row in inputlist:
+        col_index = 0
+        for item in row:
+            if col_index == 0:
+                yComponent_option3[row_index]=[int(item)]
+            elif col_index == 1:
+                yComponent_option3[row_index].append(item)
+            else:
+                value = (float(yComponent_option3[row_index][col_index-1]) + float(yComponent_option3[row_index][col_index-2]))/float(2)
+                value += float(item)
+                yComponent_option3[row_index].append(int(value))
+            col_index += 1
+        row_index += 1
+
+
+def computeInfoOption4():
+
+    global inputlist
+    global yComponent_option4
+
+    row_index = 0
+    for row in inputlist:
+        col_index = 0
+        for item in row:
+            if col_index == 0:
+                yComponent_option4[row_index]=[int(item)]
+            elif col_index == 1:
+                yComponent_option4[row_index].append(int(item))
+            elif col_index < 4:
+                value = (0.5 * float(yComponent_option4[row_index][col_index-1]) + 0.5 * float(yComponent_option4[row_index][col_index-2]))
+                value += float(item)
+                yComponent_option4[row_index].append(int(value))
+            else:
+                alpha = computeAlpha1(yComponent_option4[row_index][col_index-1], yComponent_option4[row_index][col_index-2],
+                                      yComponent_option4[row_index][col_index-3], yComponent_option4[row_index][col_index-4])
+                if alpha < 0:
+                    alpha = 0.5
+
+                value = (alpha * float(yComponent_option4[row_index][col_index-1]) + (1-alpha) *
+                         float(yComponent_option4[row_index][col_index-2]))
+                value += float(item)
+                yComponent_option4[row_index].append(int(value))
+            col_index += 1
+        row_index += 1
+
+
+def computeAlpha1(s1, s2, s3, s4):
+
+    if (float(s2) - float(s4)) == 0:
+        return 0.5
+
+    alpha = (float(s1)+float(s3)-float(s3)-float(s4)) / (float(s2) - float(s4))
+
+    if(alpha < 0) or (alpha > 1):
+        return 0.5
+    else:
+        return alpha
+
+def output(option,outputpath):
+
+    global yComponent_option1
+    global yComponent_option2
+    global yComponent_option3
+    global yComponent_option4
+
+    if option == 1:
+        # Output to File
+        with open(outputpath, 'w') as f:
+            f.write(repr(yComponent_option1))
+    elif option == 2:
+        # Encode
+        computeInfoOption2()
+        # Output to File
+        with open(outputpath, 'w') as f:
+            f.write(repr(yComponent_option2))
+    elif option == 3:
+        # Encode
+        computeInfoOption3()
+        # Output to File
+        with open(outputpath, 'w') as f:
+            f.write(repr(yComponent_option3))
+    elif option == 4:
+        # Encode
+        computeInfoOption4()
+        # Output to File
+        with open(outputpath, 'w') as f:
+            f.write(repr(yComponent_option4))
+
+    print("Saved to " + outputpath)
 
 #main
 main()
