@@ -64,7 +64,7 @@ def getinput():
     fframe.append(np.array(frames))
 
     mat = np.ndarray((fframe.__len__(),10,10), dtype = float, order = 'F')
-    print fframe.__len__()
+    # print fframe.__len__()
     for frame_index in range(0, fframe.__len__()):
         for i in range(0, 10):
             for j in range(0, 10):
@@ -107,7 +107,7 @@ def quantize():
     outputList = mat
     frame,rows, cols = outputList.shape
 
-    print outputList
+    # print outputList
 
     for i in range(0,frame):
         for j in range(0, rows):
@@ -115,13 +115,16 @@ def quantize():
             for k in range(0, cols):
                 outputList[i,j,k] = binvalues[bin_list[k]]
 
-    print outputList
+    # print outputList
 
 def output(option):
 
     global inputpath
     global outputList
     global numberofbits
+    global mat
+    if option == '1':
+        outputList = mat
 
     frames, row, cols = outputList.shape
 

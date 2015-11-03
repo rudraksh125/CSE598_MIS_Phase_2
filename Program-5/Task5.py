@@ -140,7 +140,7 @@ def main():
             print "calculating distortion: "
             if "spv" in file_extension:
                 original_file = temp_output_file.rsplit("_",3)[0] + "_original.spc"
-                distortion_spc(original_file ,temp_output_file)
+                distortion_spc(int(predictive_coding_option), original_file ,temp_output_file)
             else:
                 original_file = temp_output_file.rsplit("_",4)[0] + "_1.tpc"
                 distortion_tpc(original_file ,output_file)
@@ -356,7 +356,7 @@ def construct_sp_frames(file_name):
     fframe.append(numpy.array(frames).astype(numpy.uint8))
     return fframe
 
-def distortion_spc(original_filename, input_dc_file):
+def distortion_spc(compression_option, original_filename, input_dc_file):
 
     fframe = construct_sp_frames(original_filename)
 
@@ -379,7 +379,7 @@ def distortion_spc(original_filename, input_dc_file):
 
     original_mat = numpy.ndarray((fframe.__len__(),10,10), dtype = float, order = 'F')
 
-    compression_option = int(input_dc_file.split("_")[1])
+    # compression_option = int(input_dc_file.split("_")[1])
     if(compression_option == 1):
         for frame_index in range(0, fframe.__len__()):
             for i in range(0, 10):
